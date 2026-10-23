@@ -1,0 +1,800 @@
+
+-- TẤN DŨNG HUB V20.9
+-- Roblox Studio LocalScript:
+-- StarterPlayer > StarterPlayerScripts
+
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+local oldGui = playerGui:FindFirstChild("TanDungHubV20")
+if oldGui then oldGui:Destroy() end
+
+local C = {
+    bg = Color3.fromRGB(17, 17, 25),
+    panel = Color3.fromRGB(31, 29, 43),
+    header = Color3.fromRGB(39, 29, 55),
+    text = Color3.fromRGB(242, 236, 255),
+    muted = Color3.fromRGB(170, 160, 190),
+    purple = Color3.fromRGB(166, 92, 255),
+    off = Color3.fromRGB(67, 64, 78),
+    green = Color3.fromRGB(65, 190, 125),
+}
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "TanDungHubV20"
+gui.ResetOnSpawn = false
+gui.DisplayOrder = 999
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+gui.Parent = playerGui
+
+local connections = {}
+
+local function connect(signal, callback)
+    local conn = signal:Connect(callback)
+    table.insert(connections, conn)
+    return conn
+end
+
+local function corner(obj, radius)
+    local u = Instance.new("UICorner")
+    u.CornerRadius = UDim.new(0, radius)
+    u.Parent = obj
+end
+
+local function makeStroke(obj, color, thickness)
+    local s = Instance.new("UIStroke")
+    s.Color = color
+    s.Thickness = thickness or 1
+    s.Parent = obj
+    return s
+end
+
+-- MAIN MENU
+local main = Instance.new("Frame")
+main.Name = "Main"
+main.Size = UDim2.fromOffset(276, 390)
+main.Position = UDim2.new(0.5, -138, 0.5, -195)
+main.BackgroundColor3 = C.bg
+main.BorderSizePixel = 0
+main.Parent = gui
+corner(main, 14)
+
+local mainStroke = makeStroke(main, C.purple, 1.5)
+
+local header = Instance.new("Frame")
+header.Name = "Header"
+header.Active = true
+header.Selectable = false
+header.Size = UDim2.new(1, 0, 0, 44)
+header.BackgroundColor3 = C.header
+header.BorderSizePixel = 0
+header.Parent = main
+corner(header, 14)
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -94, 1, 0)
+title.Position = UDim2.fromOffset(12, 0)
+title.BackgroundTransparency = 1
+title.Text = "✦ TẤN DŨNG HUB V20.9"
+title.TextColor3 = C.text
+title.TextSize = 13
+title.Font = Enum.Font.GothamBold
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Active = false
+title.Parent = header
+
+local function headerButton(text, rightOffset)
+    local b = Instance.new("TextButton")
+    b.Size = UDim2.fromOffset(27, 27)
+    b.Position = UDim2.new(1, rightOffset, 0, 8)
+    b.BackgroundColor3 = Color3.fromRGB(66, 48, 84)
+    b.Text = text
+    b.TextColor3 = C.text
+    b.TextSize = 15
+    b.Font = Enum.Font.GothamBold
+    b.AutoButtonColor = true
+    b.Parent = header
+    corner(b, 7)
+    return b
+end
+
+local hideButton = headerButton("—", -62)
+local closeButton = headerButton("×", -31)
+
+-- FLOATING MENU BUTTON
+local bubble = Instance.new("TextButton")
+bubble.Name = "OpenHub"
+bubble.Size = UDim2.fromOffset(48, 48)
+bubble.Position = UDim2.new(0, 18, 0.5, -24)
+bubble.BackgroundColor3 = C.bg
+bubble.Text = "TD"
+bubble.TextColor3 = C.text
+bubble.TextSize = 16
+bubble.Font = Enum.Font.GothamBold
+bubble.Visible = false
+bubble.Parent = gui
+corner(bubble, 24)
+
+local bubbleStroke = makeStroke(bubble, C.purple, 2)
+
+-- SCROLLING CONTENT
+local content = Instance.new("ScrollingFrame")
+content.Name = "Content"
+content.Position = UDim2.fromOffset(10, 53)
+content.Size = UDim2.new(1, -20, 1, -63)
+content.BackgroundTransparency = 1
+content.BorderSizePixel = 0
+content.ScrollBarThickness = 3
+content.ScrollBarImageColor3 = C.purple
+content.AutomaticCanvasSize = Enum.AutomaticSize.Y
+content.CanvasSize = UDim2.new()
+content.Parent = main
+
+local list = Instance.new("UIListLayout")
+list.Padding = UDim.new(0, 7)
+list.SortOrder = Enum.SortOrder.LayoutOrder
+list.Parent = content
+
+local function addSection(text)
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, -2, 0, 21)
+    label.BackgroundTransparency = 1
+    label.Text = text
+    label.TextColor3 = C.purple
+    label.TextSize = 11
+    label.Font = Enum.Font.GothamBold
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = content
+end
+
+-- TOGGLE BUTTON
+local function addToggle(text, callback)
+    local row = Instance.new("Frame")
+    row.Size = UDim2.new(1, -2, 0, 40)
+    row.BackgroundColor3 = C.panel
+    row.BorderSizePixel = 0
+    row.Parent = content
+    corner(row, 9)
+
+    local label = Instance.new("TextLabel")
+    label.Position = UDim2.fromOffset(10, 0)
+    label.Size = UDim2.new(1, -72, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Text = text
+    label.TextColor3 = C.text
+    label.TextSize = 12
+    label.Font = Enum.Font.GothamMedium
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = row
+
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.fromOffset(47, 23)
+    button.Position = UDim2.new(1, -56, 0.5, -11)
+    button.BackgroundColor3 = C.off
+    button.Text = "OFF"
+    button.TextColor3 = C.text
+    button.TextSize = 10
+    button.Font = Enum.Font.GothamBold
+    button.Parent = row
+    corner(button, 12)
+
+    local enabled = false
+
+    connect(button.Activated, function()
+        enabled = not enabled
+        button.Text = enabled and "ON" or "OFF"
+        button.BackgroundColor3 = enabled and C.purple or C.off
+
+        local ok, err = pcall(callback, enabled)
+
+        if not ok then
+            warn("[Tấn Dũng Hub] " .. tostring(err))
+            enabled = false
+            button.Text = "OFF"
+            button.BackgroundColor3 = C.off
+        end
+    end)
+
+    return button
+end
+
+-- ACTION BUTTON
+local function addAction(text, callback)
+    local b = Instance.new("TextButton")
+    b.Size = UDim2.new(1, -2, 0, 35)
+    b.BackgroundColor3 = C.panel
+    b.Text = text
+    b.TextColor3 = C.text
+    b.TextSize = 11
+    b.Font = Enum.Font.GothamBold
+    b.Parent = content
+    corner(b, 8)
+
+    connect(b.Activated, callback)
+
+    return b
+end
+
+-- SLIDER
+local function addSlider(text, minValue, maxValue, initial, callback)
+    local row = Instance.new("Frame")
+    row.Size = UDim2.new(1, -2, 0, 55)
+    row.BackgroundColor3 = C.panel
+    row.BorderSizePixel = 0
+    row.Parent = content
+    corner(row, 8)
+
+    local label = Instance.new("TextLabel")
+    label.Position = UDim2.fromOffset(10, 3)
+    label.Size = UDim2.new(1, -20, 0, 19)
+    label.BackgroundTransparency = 1
+    label.TextColor3 = C.text
+    label.TextSize = 11
+    label.Font = Enum.Font.GothamMedium
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = row
+
+    local track = Instance.new("TextButton")
+    track.Name = "SliderTrack"
+    track.Position = UDim2.new(0, 10, 0, 34)
+    track.Size = UDim2.new(1, -20, 0, 7)
+    track.BackgroundColor3 = C.off
+    track.Text = ""
+    track.AutoButtonColor = false
+    track.Parent = row
+    corner(track, 4)
+
+    local fill = Instance.new("Frame")
+    fill.BackgroundColor3 = C.purple
+    fill.BorderSizePixel = 0
+    fill.Parent = track
+    corner(fill, 4)
+
+    local knob = Instance.new("Frame")
+    knob.Size = UDim2.fromOffset(13, 13)
+    knob.AnchorPoint = Vector2.new(0.5, 0.5)
+    knob.BackgroundColor3 = Color3.new(1, 1, 1)
+    knob.BorderSizePixel = 0
+    knob.Parent = track
+    corner(knob, 8)
+
+    local value = initial
+
+    local function setValue(v)
+        value = math.clamp(
+            math.floor(v + 0.5),
+            minValue,
+            maxValue
+        )
+
+        local p = (value - minValue) / (maxValue - minValue)
+
+        label.Text = text .. ": " .. tostring(value)
+        fill.Size = UDim2.new(p, 0, 1, 0)
+        knob.Position = UDim2.new(p, 0, 0.5, 0)
+
+        callback(value)
+    end
+
+    local function setFromX(x)
+        local width = track.AbsoluteSize.X
+        if width <= 0 then return end
+
+        local p = math.clamp(
+            (x - track.AbsolutePosition.X) / width,
+            0,
+            1
+        )
+
+        setValue(minValue + p * (maxValue - minValue))
+    end
+
+    local sliding = false
+
+    connect(track.InputBegan, function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1
+        or input.UserInputType == Enum.UserInputType.Touch then
+            sliding = true
+            setFromX(input.Position.X)
+        end
+    end)
+
+    connect(UIS.InputChanged, function(input)
+        if sliding and (
+            input.UserInputType == Enum.UserInputType.MouseMovement
+            or input.UserInputType == Enum.UserInputType.Touch
+        ) then
+            setFromX(input.Position.X)
+        end
+    end)
+
+    connect(UIS.InputEnded, function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1
+        or input.UserInputType == Enum.UserInputType.Touch then
+            sliding = false
+        end
+    end)
+
+    setValue(initial)
+
+    return setValue
+end
+
+-- DRAG MENU AND FLOATING PANELS
+local function makeDraggable(handle, target, tapCallback)
+    handle.Active = true
+
+    local dragging = false
+    local moved = false
+    local activeInputType = nil
+    local activeTouch = nil
+    local startInputPosition = nil
+    local startObjectPosition = nil
+
+    local function moveTo(position)
+        if not dragging then return end
+
+        local delta = position - startInputPosition
+
+        if math.abs(delta.X) > 5 or math.abs(delta.Y) > 5 then
+            moved = true
+        end
+
+        target.Position = UDim2.new(
+            startObjectPosition.X.Scale,
+            startObjectPosition.X.Offset + delta.X,
+            startObjectPosition.Y.Scale,
+            startObjectPosition.Y.Offset + delta.Y
+        )
+    end
+
+    connect(handle.InputBegan, function(input)
+        local kind = input.UserInputType
+
+        if kind ~= Enum.UserInputType.Touch
+        and kind ~= Enum.UserInputType.MouseButton1 then
+            return
+        end
+
+        dragging = true
+        moved = false
+        activeInputType = kind
+        activeTouch = kind == Enum.UserInputType.Touch and input or nil
+        startInputPosition = input.Position
+        startObjectPosition = target.Position
+    end)
+
+    connect(UIS.InputChanged, function(input)
+        if not dragging then return end
+
+        if activeInputType == Enum.UserInputType.MouseButton1
+        and input.UserInputType == Enum.UserInputType.MouseMovement then
+            moveTo(input.Position)
+        end
+    end)
+
+    connect(UIS.TouchMoved, function(input)
+        if dragging
+        and activeInputType == Enum.UserInputType.Touch
+        and activeTouch == input then
+            moveTo(input.Position)
+        end
+    end)
+
+    connect(UIS.InputEnded, function(input)
+        local mouseEnd =
+            activeInputType == Enum.UserInputType.MouseButton1
+            and input.UserInputType == Enum.UserInputType.MouseButton1
+
+        local touchEnd =
+            activeInputType == Enum.UserInputType.Touch
+            and input == activeTouch
+
+        if dragging and (mouseEnd or touchEnd) then
+            dragging = false
+            activeInputType = nil
+            activeTouch = nil
+
+            if not moved and tapCallback then
+                tapCallback()
+            end
+        end
+    end)
+end
+
+makeDraggable(header, main)
+
+makeDraggable(bubble, bubble, function()
+    main.Visible = true
+    bubble.Visible = false
+end)
+
+connect(hideButton.Activated, function()
+    main.Visible = false
+    bubble.Visible = true
+end)
+
+connect(closeButton.Activated, function()
+    gui:Destroy()
+end)
+
+-- FPS + MS PANEL
+addSection("STATUS")
+
+local hudEnabled = false
+local frameCount = 0
+local elapsed = 0
+
+local hudPanel = Instance.new("Frame")
+hudPanel.Name = "FPSMSPanel"
+hudPanel.Size = UDim2.fromOffset(180, 64)
+hudPanel.Position = UDim2.new(0, 18, 0.22, 0)
+hudPanel.BackgroundColor3 = C.bg
+hudPanel.BorderSizePixel = 0
+hudPanel.Visible = false
+hudPanel.Parent = gui
+corner(hudPanel, 10)
+
+local hudStroke = makeStroke(hudPanel, C.purple, 1.5)
+
+local hudHeader = Instance.new("TextButton")
+hudHeader.Name = "DragHandle"
+hudHeader.Size = UDim2.new(1, 0, 0, 23)
+hudHeader.BackgroundColor3 = C.header
+hudHeader.BorderSizePixel = 0
+hudHeader.Text = "FPS + MS  •  KÉO ĐỂ DI CHUYỂN"
+hudHeader.TextColor3 = C.text
+hudHeader.TextSize = 9
+hudHeader.Font = Enum.Font.GothamBold
+hudHeader.AutoButtonColor = false
+hudHeader.Parent = hudPanel
+corner(hudHeader, 8)
+
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Name = "Stats"
+statusLabel.Position = UDim2.fromOffset(8, 27)
+statusLabel.Size = UDim2.new(1, -16, 0, 29)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Text = "FPS: --  |  MS: --"
+statusLabel.TextColor3 = Color3.fromRGB(160, 255, 190)
+statusLabel.TextSize = 13
+statusLabel.Font = Enum.Font.GothamBold
+statusLabel.Parent = hudPanel
+
+addToggle("FPS + MS — bảng riêng có thể kéo", function(on)
+    hudEnabled = on
+    hudPanel.Visible = on
+
+    if not on then
+        statusLabel.Text = "FPS: --  |  MS: --"
+    end
+end)
+
+makeDraggable(hudHeader, hudPanel)
+
+connect(RunService.RenderStepped, function(dt)
+    if not hudEnabled or not hudPanel.Parent then return end
+
+    frameCount += 1
+    elapsed += dt
+
+    if elapsed >= 1 then
+        local ping = math.floor(
+            player:GetNetworkPing() * 1000 + 0.5
+        )
+
+        statusLabel.Text = string.format(
+            "FPS: %d  |  MS: %d",
+            frameCount,
+            ping
+        )
+
+        frameCount = 0
+        elapsed = 0
+    end
+end)
+
+-- ESP
+addSection("ESP SETTINGS")
+
+local espEnabled = false
+local espSize = 14
+local espColorIndex = 1
+
+local espColors = {
+    {name = "PURPLE", color = Color3.fromRGB(166, 92, 255)},
+    {name = "BLUE", color = Color3.fromRGB(60, 180, 255)},
+    {name = "PINK", color = Color3.fromRGB(255, 75, 130)},
+    {name = "GREEN", color = Color3.fromRGB(80, 255, 160)},
+    {name = "YELLOW", color = Color3.fromRGB(255, 210, 70)},
+    {name = "WHITE", color = Color3.fromRGB(255, 255, 255)},
+}
+
+local espObjects = {}
+
+local function clearESP()
+    for _, obj in ipairs(espObjects) do
+        if obj and obj.Parent then
+            obj:Destroy()
+        end
+    end
+
+    table.clear(espObjects)
+end
+
+local function refreshESP()
+    clearESP()
+
+    if not espEnabled then return end
+
+    local selectedColor = espColors[espColorIndex].color
+
+    for _, target in ipairs(Players:GetPlayers()) do
+        if target ~= player and target.Character then
+            local character = target.Character
+
+            local highlight = Instance.new("Highlight")
+            highlight.Name = "TDHubHighlight"
+            highlight.Adornee = character
+            highlight.FillColor = selectedColor
+            highlight.OutlineColor = selectedColor
+            highlight.FillTransparency = 0.72
+            highlight.Parent = character
+            table.insert(espObjects, highlight)
+
+            local head = character:FindFirstChild("Head")
+
+            if head then
+                local billboard = Instance.new("BillboardGui")
+                billboard.Name = "TDHubESPLabel"
+                billboard.Adornee = head
+                billboard.Size = UDim2.fromOffset(
+                    espSize * 7,
+                    espSize * 2
+                )
+                billboard.StudsOffset = Vector3.new(0, 2.4, 0)
+                billboard.AlwaysOnTop = true
+                billboard.Parent = gui
+                table.insert(espObjects, billboard)
+
+                local text = Instance.new("TextLabel")
+                text.Size = UDim2.fromScale(1, 1)
+                text.BackgroundTransparency = 1
+                text.Text = target.DisplayName
+                text.TextColor3 = selectedColor
+                text.TextStrokeTransparency = 0.25
+                text.TextScaled = true
+                text.Font = Enum.Font.GothamBold
+                text.Parent = billboard
+            end
+        end
+    end
+end
+
+addToggle("Player ESP", function(on)
+    espEnabled = on
+    refreshESP()
+end)
+
+addSlider("ESP Size", 8, 24, espSize, function(value)
+    espSize = value
+
+    if espEnabled then
+        refreshESP()
+    end
+end)
+
+local espColorButton
+
+espColorButton = addAction("ESP COLOR: PURPLE", function()
+    espColorIndex = espColorIndex % #espColors + 1
+
+    local selected = espColors[espColorIndex]
+    espColorButton.Text = "ESP COLOR: " .. selected.name
+
+    if espEnabled then
+        refreshESP()
+    end
+end)
+
+connect(Players.PlayerAdded, function(target)
+    connect(target.CharacterAdded, function()
+        task.wait(1)
+
+        if espEnabled and gui.Parent then
+            refreshESP()
+        end
+    end)
+end)
+
+connect(Players.PlayerRemoving, function()
+    task.defer(function()
+        if espEnabled and gui.Parent then
+            refreshESP()
+        end
+    end)
+end)
+
+-- FIX LAG
+-- Disable supported visual effects, remove shadows,
+-- and make world BaseParts gray and translucent.
+-- Turning Fix Lag off restores saved local properties.
+addSection("PERFORMANCE")
+
+local fixEnabled = false
+local savedEffects = {}
+local savedWorldParts = {}
+local savedShadows = nil
+local descendantConnection = nil
+local lightingEffectConnection = nil
+
+local function isVisualEffect(obj)
+    return obj:IsA("ParticleEmitter")
+        or obj:IsA("Trail")
+        or obj:IsA("Beam")
+        or obj:IsA("Smoke")
+        or obj:IsA("Fire")
+        or obj:IsA("Sparkles")
+        or obj:IsA("PostEffect")
+end
+
+local function disableEffect(obj)
+    if not fixEnabled or not isVisualEffect(obj) then
+        return
+    end
+
+    if savedEffects[obj] == nil then
+        local ok, enabled = pcall(function()
+            return obj.Enabled
+        end)
+
+        if ok then
+            savedEffects[obj] = enabled
+        end
+    end
+
+    pcall(function()
+        obj.Enabled = false
+    end)
+end
+
+local function grayTransparentPart(obj)
+    if not fixEnabled or not obj:IsA("BasePart") then
+        return
+    end
+
+    if savedWorldParts[obj] == nil then
+        savedWorldParts[obj] = {
+            Color = obj.Color,
+            Transparency = obj.Transparency,
+        }
+    end
+
+    pcall(function()
+        obj.Color = Color3.fromRGB(125, 125, 125)
+        obj.Transparency = math.max(obj.Transparency, 0.35)
+    end)
+end
+
+local function processWorldObject(obj)
+    disableEffect(obj)
+    grayTransparentPart(obj)
+end
+
+local function setFixLag(on)
+    if on == fixEnabled then return end
+
+    fixEnabled = on
+
+    if on then
+        savedShadows = Lighting.GlobalShadows
+        Lighting.GlobalShadows = false
+
+        for _, obj in ipairs(workspace:GetDescendants()) do
+            processWorldObject(obj)
+        end
+
+        for _, obj in ipairs(Lighting:GetDescendants()) do
+            disableEffect(obj)
+        end
+
+        descendantConnection = workspace.DescendantAdded:Connect(function(obj)
+            task.defer(processWorldObject, obj)
+        end)
+
+        lightingEffectConnection = Lighting.DescendantAdded:Connect(function(obj)
+            task.defer(disableEffect, obj)
+        end)
+    else
+        if descendantConnection then
+            descendantConnection:Disconnect()
+            descendantConnection = nil
+        end
+
+        if lightingEffectConnection then
+            lightingEffectConnection:Disconnect()
+            lightingEffectConnection = nil
+        end
+
+        for obj, wasEnabled in pairs(savedEffects) do
+            if obj and obj.Parent then
+                pcall(function()
+                    obj.Enabled = wasEnabled
+                end)
+            end
+        end
+
+        table.clear(savedEffects)
+
+        for obj, original in pairs(savedWorldParts) do
+            if obj and obj.Parent then
+                pcall(function()
+                    obj.Color = original.Color
+                    obj.Transparency = original.Transparency
+                end)
+            end
+        end
+
+        table.clear(savedWorldParts)
+
+        if savedShadows ~= nil then
+            Lighting.GlobalShadows = savedShadows
+            savedShadows = nil
+        end
+    end
+end
+
+addToggle(
+    "Fix Lag — hiệu ứng tắt, vật thể xám trong suốt",
+    setFixLag
+)
+
+-- THEME COLOR
+addSection("APPEARANCE")
+
+addAction("CHANGE MENU COLOR", function()
+    local palette = {
+        Color3.fromRGB(166, 92, 255),
+        Color3.fromRGB(60, 180, 255),
+        Color3.fromRGB(255, 75, 130),
+        Color3.fromRGB(80, 255, 160),
+    }
+
+    local current = 1
+
+    for i, color in ipairs(palette) do
+        if color == C.purple then
+            current = i
+            break
+        end
+    end
+
+    C.purple = palette[current % #palette + 1]
+    mainStroke.Color = C.purple
+    bubbleStroke.Color = C.purple
+    content.ScrollBarImageColor3 = C.purple
+end)
+
+-- CLEANUP
+connect(gui.Destroying, function()
+    if descendantConnection then
+        descendantConnection:Disconnect()
+    end
+
+    if lightingEffectConnection then
+        lightingEffectConnection:Disconnect()
+    end
+
+    for _, conn in ipairs(connections) do
+        if conn.Connected then
+            conn:Disconnect()
+        end
+    end
+end)
+
+print("Tấn Dũng Hub V20.9 loaded")
